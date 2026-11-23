@@ -1,0 +1,21 @@
+# chatterbox-tts 0.1.7 is installed with --no-deps in the Dockerfile: its metadata pulls gradio==6.8.0,
+# a demo UI this API never imports. Everything the models import is listed here.
+numpy<2.0.0
+librosa==0.11.0
+s3tokenizer
+torch==2.6.0
+torchaudio==2.6.0
+transformers==5.2.0
+diffusers==0.29.0
+resemble-perth==1.0.1
+conformer==0.3.2
+safetensors==0.5.3
+spacy-pkuseg
+pykakasi==2.3.0
+pyloudnorm
+omegaconf
+huggingface_hub
+soundfile
+fastapi==0.165.0
+uvicorn==0.54.0
+python-multipart==0.0.34

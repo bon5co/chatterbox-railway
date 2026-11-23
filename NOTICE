@@ -1,0 +1,20 @@
+Wrapper code in this repository (app.py, fetch_weights.py, entrypoint.sh, Dockerfile) is Apache-2.0, see LICENSE.
+
+The container image built from it contains:
+
+- chatterbox-tts 0.1.7 (https://github.com/resemble-ai/chatterbox), MIT License, Copyright (c) 2025 Resemble AI,
+  installed unmodified from PyPI. The licence text ships in the image at /licenses/chatterbox-LICENSE. The
+  upstream README states that the project was retired and is no longer maintained (August 2026).
+- The Chatterbox model weights, fetched at build time from three Hugging Face repositories, each pinned to a
+  commit SHA in fetch_weights.py. All three declare `license: mit` and are ungated (read 2026-11-24):
+    ResembleAI/chatterbox-turbo (Turbo, 350M), ResembleAI/chatterbox-nano (Nano, 110M) and
+    ResembleAI/chatterbox (Multilingual, 23 languages).
+- Resemble Perth (resemble-perth 1.0.1), the implicit watermarker that upstream applies to every audio file the
+  models produce. The watermark is inaudible, survives common edits, and is part of the models' output path;
+  this wrapper does not remove it.
+- PyTorch (BSD-3-Clause), the Hugging Face libraries (Apache-2.0), librosa (ISC), soundfile (BSD-3-Clause),
+  FastAPI (MIT), uvicorn (BSD-3-Clause) and the other Python dependencies pinned in requirements.txt, each
+  under its own licence.
+
+Voice cloning: the clone endpoint produces speech in the voice of a reference clip you upload. You are
+responsible for having the speaker's permission to clone their voice.
