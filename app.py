@@ -229,16 +229,19 @@ async def _run(name, text, language, ref_path, fmt, temperature, exaggeration, c
         if not _run_lock.acquire(timeout=max(1.0, deadline - time.time())):
             raise _Deadline()
         try:
-            return _synthesise(name, text, language, ref_path, temperature, exaggeration, cfg_weight, seed, deadline)
+            t_load = time.time()
+            _load_model(name)  # a cold model is loaded here so the speed figures below exclude it
+            load_s = time.time() - t_load
+            t_gen = time.time()
+            audio, sr, pieces = _synthesise(name, text, language, ref_path, temperature, exaggeration,
+                                            cfg_weight, seed, deadline)
+            return audio, sr, pieces, time.time() - t_gen, load_s
         finally:
             _run_lock.release()
 
     try:
-        t0 = None
         try:
-            started = time.time()
-            audio, sr, pieces = await asyncio.to_thread(job)
-            t0 = time.time() - started
+            audio, sr, pieces, t0, load_s = await asyncio.to_thread(job)
         except _Deadline:
             return JSONResponse({"error": f"could not finish within {MAX_SECONDS:.0f} s; send less text"},
                                 status_code=504)
@@ -250,7 +253,7 @@ async def _run(name, text, language, ref_path, fmt, temperature, exaggeration, c
         seconds = len(audio) / sr
         headers = {"X-Processing-Seconds": f"{t0:.2f}", "X-Audio-Seconds": f"{seconds:.2f}",
                    "X-Realtime-Factor": f"{t0 / seconds:.2f}" if seconds else "0", "X-Model": name,
-                   "X-Sample-Rate": str(sr), "X-Pieces": str(pieces)}
+                   "X-Sample-Rate": str(sr), "X-Pieces": str(pieces), "X-Load-Seconds": f"{load_s:.2f}"}
         return Response(body, media_type=FORMATS[fmt][0], headers=headers)
     finally:
         with _pending_lock:

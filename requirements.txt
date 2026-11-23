@@ -211,8 +211,8 @@ scipy==1.17.1
     #   librosa
     #   pyloudnorm
     #   scikit-learn
-setuptools==84.2.1
-    # via torch
+setuptools==80.9.0
+    # via torch; pinned below 81 because resemble-perth imports pkg_resources, which setuptools 81 removed (without it the watermarker is None and every model constructor fails)
 shellingham==1.5.4
     # via typer
 soundfile==0.14.0
