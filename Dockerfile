@@ -14,12 +14,10 @@ RUN pip install --extra-index-url https://download.pytorch.org/whl/cpu -r /tmp/r
 # Weights: three MIT-licensed, ungated Hugging Face repositories, pinned to commit SHAs (see fetch_weights.py).
 ENV MODEL_ROOT=/models
 COPY fetch_weights.py /tmp/fetch_weights.py
-RUN python /tmp/fetch_weights.py && rm -rf /root/.cache && du -sh /models
+RUN python /tmp/fetch_weights.py && find /models -name .cache -type d -prune -exec rm -rf {} + && rm -rf /root/.cache && du -sh /models
 
-# The wheel carries the MIT licence text of resemble-ai/chatterbox; keep a copy readable at /licenses/.
-RUN mkdir -p /licenses \
-    && python -c "import importlib.metadata as m,sys; d=m.distribution('chatterbox-tts'); t=[f for f in d.files if 'LICENSE' in str(f).upper()]; sys.stdout.write(d.read_text(str(t[0])) if t else d.metadata['License'])" > /licenses/chatterbox-LICENSE \
-    && wc -c /licenses/chatterbox-LICENSE
+# MIT licence text of resemble-ai/chatterbox (LICENSE at commit ab55923c27757c90cfcc407baa57dc25a7d25217).
+COPY LICENSE-chatterbox /licenses/chatterbox-LICENSE
 
 RUN useradd --uid 1000 --create-home --shell /usr/sbin/nologin tts \
     && chmod -R a+rX /models /licenses
